@@ -2,7 +2,10 @@ define(function (require) {
 
     "use strict";
 
-    var findById = function (id) {
+    var $           = require('jquery'),
+        Backbone    = require('backbone'),
+
+        findById = function (id) {
             var deferred = $.Deferred(),
                 product = null,
                 l = products.length;
@@ -165,12 +168,37 @@ define(function (require) {
                     "Inset sleeve design for comfort and improved fit"
                 ]
             }
-        ];
+        ],
 
-    // The public API
+        Product = Backbone.Model.extend({
+
+            sync: function (method, model, options) {
+                if (method === "read") {
+                    findById(parseInt(this.id)).done(function (data) {
+                        options.success(data);
+                    });
+                }
+            }
+
+        }),
+
+        ProductCollection = Backbone.Collection.extend({
+
+            model: Product,
+
+            sync: function (method, model, options) {
+                if (method === "read") {
+                    findByName(options.data.name).done(function (data) {
+                        options.success(data);
+                    });
+                }
+            }
+
+        });
+
     return {
-        findById: findById,
-        findByName: findByName
+        Product: Product,
+        ProductCollection: ProductCollection
     };
 
-}());
+});

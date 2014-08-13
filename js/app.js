@@ -1,33 +1,46 @@
-var app = {
-    views: {}
-};
+require.config({
 
-$(document).ready(function () {
+    baseUrl: 'lib',
 
-    "use strict";
+    paths: {
+        app: '../js',
+        tpl: '../tpl'
+    },
 
-    var detailsURL = /^#products\/(\d{1,})/;
-
-    function route() {
-        var hash = window.location.hash,
-            match,
-            view;
-        if (!hash) {
-            view = new app.views.HomeView();
-            $("body").html(view.render().$el);
+    map: {
+        '*': {
+            'app/models/product': 'app/models/memory/product'
         }
-        match = hash.match(detailsURL);
-        if (match) {
-            app.productAdapter.findById(Number(match[1])).done(function (product) {
-                view = new app.views.ProductView(product);
-                $("body").html(view.render().$el);
-            });
+    },
+    shim: {
+        'handlebars': {
+            exports: 'Handlebars'
+        },
+        'backbone': {
+            deps: ['underscore', 'jquery'],
+            exports: 'Backbone'
+        },
+        'underscore': {
+            exports: '_'
         }
     }
 
-    app.templates.load("Home", "Product", "ProductListItem").done(function () {
-        route();
-        $(window).on('hashchange', route);
+});
+
+require(['jquery', 'backbone', "fastclick", 'app/router'], function ($, Backbone, FastClick, Router) {
+
+    "use strict";
+
+    var router = new Router();
+
+    $(function () {
+        FastClick.attach(document.body);
     });
 
+    $("body").on("click", ".back-button", function (event) {
+        event.preventDefault();
+        window.history.back();
+    });
+
+    Backbone.history.start();
 });
